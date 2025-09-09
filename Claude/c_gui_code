@@ -1,0 +1,539 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronDown, Code, Play, X, Eye, Sparkles, Terminal, BookOpen, Lightbulb } from 'lucide-react';
+
+const App = () => {
+  const [currentPage, setCurrentPage] = useState('intro');
+  const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [activeTab, setActiveTab] = useState('question');
+  const [showCode, setShowCode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [terminalOutput, setTerminalOutput] = useState([]);
+  const [solution, setSolution] = useState('');
+  const [inputs, setInputs] = useState({});
+  
+  // Questions data
+  const questions = [
+    {
+      id: 1,
+      title: "Palindromic Prime Pattern",
+      text: "A prime number is 12345678910987654321. Here n is 10. Find the next number that follows this pattern. That number n lies between 1000 and 3000.",
+      inputs: ['min_n', 'max_n'],
+      inputLabels: ['Min n', 'Max n'],
+      code: `# Solution for palindromic prime pattern
+# Creates numbers like 123...n...321 and checks for primality
+import gmpy2
+for i in range(n, m + 1):
+    num = ""
+    for x in range(1, i + 1):
+        num += str(x)
+    for x in range(1, i):
+        num += str(i - x)
+    if gmpy2.is_prime(int(num)):
+        print(f"{num} is prime where n = {i}")`,
+      hint: "The pattern creates palindromic numbers by concatenating 1 to n and then n-1 back to 1"
+    },
+    {
+      id: 2,
+      title: "Repunit Primes",
+      text: "11 is prime. 111 is not prime. We use the notation, 1ₓ means N ones. For example, 1₇ means seven ones (1111111). 1ₙ is represented by (10^n-1)/9. If N is prime 1ₙ might be prime. Let's not prime, 1ₓ means N ones. Find primes where p lies between 2201 and 2299.",
+      inputs: ['min_n', 'max_n', 'prime_limit'],
+      inputLabels: ['Min n', 'Max n', 'Prime limit'],
+      code: `# Repunit prime checker
+# Checks if numbers of form 111...1 (n ones) are prime
+for i in range(n, m+1):
+    if MR_Primality_Check(((10**i - 1) // 9)):
+        print(f"1({i}) = {((10**i - 1) // 9)} is prime")`
+    },
+    {
+      id: 3,
+      title: "Mersenne Primes",
+      text: "2^p - 1 is a prime if p is prime, then 2^p - 1 is a perfect number. Find Mersenne primes where p lies between 2201 and 2299.",
+      inputs: ['min_p', 'max_p'],
+      inputLabels: ['Min p', 'Max p'],
+      code: `# Mersenne prime finder
+# Tests 2^p - 1 for primality
+for i in range(n, m+1):
+    x = 2**i - 1
+    if gmpy2.is_prime(x):
+        print(f"2^{i} - 1 = {x} is prime")`
+    },
+    {
+      id: 4,
+      title: "Brocard's Conjecture",
+      text: "For every n ≥ 2. Use the prime numbers from question 3. Find four prime numbers between the squares of those numbers.",
+      inputs: ['min_p', 'max_p'],
+      inputLabels: ['Min p', 'Max p'],
+      code: `# Verifies at least 4 primes exist between consecutive prime squares
+for p in primes:
+    q = next_prime(p)
+    count = 0
+    for x in range(p**2, q**2):
+        if is_prime(x):
+            count += 1
+        if count >= 4:
+            print("PROVED!")`
+    },
+    {
+      id: 5,
+      title: "Palindromic Primes",
+      text: "The simpler ones are 11 and 12233221. More interesting ones are 123333...333321 and 123333555555333321. The largest found so far is 10^88529 - 10^44264 - 1 which has 1,888,529 digits. Find a palindromic prime that has at least 50 digits.",
+      inputs: ['min_digits', 'max_digits', 'prime_count'],
+      inputLabels: ['Min digits', 'Max digits', 'Prime count'],
+      code: `# Generates palindromic primes with specified digit count
+half = "1" + "0" * (n//2 - 1)
+for x in range(10):
+    palindrome = half + str(x) + half[::-1]
+    if is_prime(palindrome):
+        print(f"{palindrome} is prime with {len(palindrome)} digits")`
+    },
+    {
+      id: 6,
+      title: "Perfect Numbers",
+      text: "A perfect number is a positive integer that is equal to the sum of its positive proper divisors. Show that divisors excluding the number itself. For instance, 6 has proper divisors 1, 2 and 3, and 1 + 2 + 3 = 6, so 6 is a perfect number. The next perfect number is 28 whose perfect divisor is 1 + 2 + 4 + 7 + 14 = 28. Euler proved that all even perfect numbers followed this form. Using primes in #3, prove that the above expression is perfect.",
+      inputs: ['min_p', 'max_p'],
+      inputLabels: ['Min p', 'Max p'],
+      code: `# Verifies perfect numbers using Mersenne primes
+x = 2^(p-1) * (2^p - 1)
+sum_divisors = sum(all_proper_divisors(x))
+if sum_divisors == x:
+    print("[Proved]")`
+    },
+    {
+      id: 7,
+      title: "Prime Conjectures",
+      text: "Take some interesting problem in prime numbers, which are all open problems. Some are as follows and prove or disprove them for numbers less than 50 digits:\na) Wieferich primes\nb) Goldbach's conjecture\nc) Weak Goldbach Problem\nd) Legendre's conjecture\ne) Oppermann's conjecture",
+      inputs: ['problem_type', 'limit'],
+      inputLabels: ['Problem (a/b/c/d/e)', 'Limit'],
+      code: `# Various prime conjectures implementations
+# Wieferich: Find p where 2^(p-1) ≡ 1 (mod p^2)
+# Goldbach: Every even n>2 = sum of two primes
+# Weak Goldbach: Every odd n>5 = sum of three primes
+# Legendre: Prime exists between n^2 and (n+1)^2
+# Oppermann: Primes exist in [n(n-1), n^2] and [n^2, n(n+1)]`
+    }
+  ];
+
+  // Animation variants for page transitions
+  const pageTransition = {
+    initial: { opacity: 0, y: 50, rotateX: -15 },
+    animate: { opacity: 1, y: 0, rotateX: 0 },
+    exit: { opacity: 0, y: -50, rotateX: 15 }
+  };
+
+  // Handle solution execution
+  const handleGetSolution = async () => {
+    setIsLoading(true);
+    setActiveTab('solution');
+    
+    // Simulate terminal output
+    const output = [];
+    output.push('> Initializing prime checker...');
+    output.push('> Loading gmpy2 library...');
+    output.push('> Starting computation...');
+    
+    setTerminalOutput(output);
+    
+    // Simulate progressive output
+    setTimeout(() => {
+      output.push(`> Testing range: ${inputs.min_n || 1000} to ${inputs.max_n || 3000}`);
+      setTerminalOutput([...output]);
+    }, 1000);
+    
+    setTimeout(() => {
+      output.push('> Found prime candidate...');
+      output.push('> Verifying with Miller-Rabin test...');
+      setTerminalOutput([...output]);
+    }, 2000);
+    
+    setTimeout(() => {
+      // Mock solution based on question
+      let finalAnswer = '';
+      if (currentQuestion === 1) {
+        finalAnswer = 'n = 1234';
+      } else if (currentQuestion === 2) {
+        finalAnswer = 'Repunit prime found at n = 2203';
+      } else {
+        finalAnswer = 'Solution computed successfully';
+      }
+      
+      output.push('> ✓ Computation complete!');
+      output.push(`> ANSWER: ${finalAnswer}`);
+      setTerminalOutput([...output]);
+      setSolution(finalAnswer);
+      setIsLoading(false);
+      
+      // Play success sound (commented - add your own)
+      // new Audio('/success.mp3').play();
+    }, 3500);
+  };
+
+  // Particle effect component
+  const ParticleField = () => (
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(50)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-pulse"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        >
+          <div className="w-1 h-1 bg-blue-400 rounded-full opacity-50" />
+        </div>
+      ))}
+    </div>
+  );
+
+  // 3D rotating cube background
+  const Cube3D = () => (
+    <div className="absolute inset-0 flex items-center justify-center opacity-10">
+      <div className="relative w-64 h-64 animate-spin" style={{ animationDuration: '20s' }}>
+        <div className="absolute inset-0 border-2 border-cyan-500 transform rotate-45" />
+        <div className="absolute inset-0 border-2 border-purple-500 transform rotate-12" />
+        <div className="absolute inset-0 border-2 border-pink-500 transform -rotate-12" />
+      </div>
+    </div>
+  );
+
+  // Matrix rain effect
+  const MatrixRain = () => (
+    <div className="absolute inset-0 overflow-hidden opacity-20">
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute text-green-400 text-xs animate-pulse"
+          style={{
+            left: `${i * 5}%`,
+            animationDelay: `${Math.random() * 2}s`,
+            animation: 'fall 10s linear infinite'
+          }}
+        >
+          {[...Array(30)].map((_, j) => (
+            <div key={j} className="opacity-50">
+              {Math.random() > 0.5 ? '1' : '0'}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Intro page
+  if (currentPage === 'intro') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center relative overflow-hidden">
+        <ParticleField />
+        <MatrixRain />
+        <Cube3D />
+        
+        <div className="relative z-10 text-center space-y-8 p-8 max-w-4xl animate-fade-in">
+          {/* Add your opening animation/gif here */}
+          <div className="mb-8">
+            <Sparkles className="w-16 h-16 mx-auto text-cyan-400 animate-pulse" />
+            {/* Replace with: <img src="/spark-animation.gif" className="mx-auto" /> */}
+          </div>
+          
+          <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-600 animate-pulse">
+            Prime Numbers Assignment
+          </h1>
+          
+          <div className="bg-black/30 backdrop-blur-md rounded-2xl p-8 border border-cyan-500/30">
+            <h2 className="text-2xl text-cyan-300 mb-6">Presented by:</h2>
+            <div className="space-y-3 text-xl text-gray-300">
+              <div className="transform hover:scale-105 transition-transform">
+                1. xyz - Roll No 1
+              </div>
+              <div className="transform hover:scale-105 transition-transform">
+                2. yzx - Roll No 2
+              </div>
+              <div className="transform hover:scale-105 transition-transform">
+                3. zxy - Roll No 3
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setCurrentPage('questions')}
+            className="mt-8 px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full text-white font-bold text-lg hover:scale-105 transform transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50"
+          >
+            Start Assignment
+            <ChevronDown className="inline-block ml-2 animate-bounce" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Questions page
+  if (currentPage === 'questions') {
+    const question = questions[currentQuestion - 1];
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 relative overflow-hidden">
+        <ParticleField />
+        <Cube3D />
+        
+        <div className="relative z-10 p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-600">
+              Prime Numbers Assignment
+            </h1>
+            <div className="mt-2 text-gray-400">Question {currentQuestion} of {questions.length}</div>
+          </div>
+          
+          {/* Question Rectangle */}
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-black/40 backdrop-blur-xl rounded-3xl border border-cyan-500/30 overflow-hidden shadow-2xl">
+              {/* Tabs */}
+              {activeTab !== 'question' && (
+                <div className="flex border-b border-cyan-500/30">
+                  <button
+                    onClick={() => setActiveTab('question')}
+                    className={`px-6 py-3 transition-all ${activeTab === 'question' ? 'bg-cyan-500/20 text-cyan-300' : 'text-gray-400 hover:text-cyan-300'}`}
+                  >
+                    <BookOpen className="inline-block w-4 h-4 mr-2" />
+                    Question
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('solution')}
+                    className={`px-6 py-3 transition-all ${activeTab === 'solution' ? 'bg-cyan-500/20 text-cyan-300' : 'text-gray-400 hover:text-cyan-300'}`}
+                  >
+                    <Terminal className="inline-block w-4 h-4 mr-2" />
+                    Solution
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('hint')}
+                    className={`px-6 py-3 transition-all ${activeTab === 'hint' ? 'bg-cyan-500/20 text-cyan-300' : 'text-gray-400 hover:text-cyan-300'}`}
+                  >
+                    <Lightbulb className="inline-block w-4 h-4 mr-2" />
+                    Hint
+                  </button>
+                </div>
+              )}
+              
+              <div className="p-8 relative">
+                {/* Show Code button */}
+                {activeTab === 'hint' && (
+                  <button
+                    onClick={() => setShowCode(!showCode)}
+                    className="absolute top-4 right-4 p-2 bg-purple-600/50 rounded-lg hover:bg-purple-600 transition-colors"
+                  >
+                    {showCode ? <X className="w-5 h-5" /> : <Code className="w-5 h-5" />}
+                  </button>
+                )}
+                
+                {/* Content based on active tab */}
+                {activeTab === 'question' && !showCode && (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold text-cyan-300">
+                      Q{currentQuestion}. {question.title}
+                    </h2>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      {question.text}
+                    </p>
+                    
+                    <div className="space-y-4 mt-8">
+                      {question.inputs.map((input, idx) => (
+                        <div key={input} className="flex items-center space-x-4">
+                          <label className="text-gray-400 w-32">
+                            {question.inputLabels[idx]}:
+                          </label>
+                          <input
+                            type="text"
+                            value={inputs[input] || ''}
+                            onChange={(e) => setInputs({...inputs, [input]: e.target.value})}
+                            className="flex-1 px-4 py-2 bg-black/50 border border-cyan-500/30 rounded-lg text-cyan-300 focus:outline-none focus:border-cyan-400"
+                            placeholder={`Enter ${question.inputLabels[idx]}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <button
+                      onClick={handleGetSolution}
+                      disabled={isLoading}
+                      className="mt-6 px-8 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg text-white font-bold hover:scale-105 transform transition-all duration-300 flex items-center space-x-2"
+                    >
+                      <Play className="w-5 h-5" />
+                      <span>{isLoading ? 'Computing...' : 'Get Solution'}</span>
+                    </button>
+                  </div>
+                )}
+                
+                {activeTab === 'solution' && !showCode && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-cyan-300 mb-4">Terminal Output</h3>
+                    <div className="bg-black rounded-lg p-4 font-mono text-sm h-64 overflow-y-auto">
+                      {terminalOutput.map((line, idx) => (
+                        <div key={idx} className="text-green-400 mb-1">
+                          {line}
+                        </div>
+                      ))}
+                      {isLoading && (
+                        <div className="text-yellow-400 animate-pulse">
+                          Processing...
+                        </div>
+                      )}
+                    </div>
+                    
+                    {solution && !isLoading && (
+                      <div className="mt-6 p-6 bg-gradient-to-r from-cyan-500/20 to-purple-600/20 rounded-xl border border-cyan-400/50 animate-pulse">
+                        <div className="text-center">
+                          <Sparkles className="w-8 h-8 mx-auto mb-2 text-yellow-400" />
+                          <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                            Final Answer
+                          </div>
+                          <div className="text-xl text-white mt-2">
+                            {solution}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {activeTab === 'hint' && !showCode && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-cyan-300 mb-4">Solution Hint</h3>
+                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 border border-cyan-500/30">
+                      <p className="text-gray-300">
+                        {question.hint || "The pattern creates palindromic numbers by concatenating sequences. Think about how the numbers are constructed and what makes them special."}
+                      </p>
+                      {/* Add flowchart image here */}
+                      {/* <img src={`/flowchart-q${currentQuestion}.png`} alt="Flowchart" className="mt-4 mx-auto" /> */}
+                    </div>
+                  </div>
+                )}
+                
+                {showCode && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-cyan-300 mb-4">Solution Code</h3>
+                    <pre className="bg-black rounded-lg p-4 overflow-x-auto">
+                      <code className="text-green-400 text-sm">
+                        {question.code}
+                      </code>
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Navigation */}
+          <div className="max-w-6xl mx-auto mt-8 flex justify-between">
+            <button
+              onClick={() => currentQuestion > 1 ? setCurrentQuestion(currentQuestion - 1) : setCurrentPage('intro')}
+              className="px-6 py-3 bg-gray-800/50 backdrop-blur rounded-lg text-gray-300 hover:bg-gray-700/50 transition-colors"
+            >
+              Previous
+            </button>
+            
+            <div className="flex space-x-2">
+              {questions.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentQuestion(idx + 1)}
+                  className={`w-10 h-10 rounded-full transition-all ${
+                    currentQuestion === idx + 1 
+                      ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white' 
+                      : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+            </div>
+            
+            <button
+              onClick={() => currentQuestion < questions.length ? setCurrentQuestion(currentQuestion + 1) : setCurrentPage('thanks')}
+              className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-lg text-white hover:scale-105 transform transition-all"
+            >
+              {currentQuestion === questions.length ? 'Finish' : 'Next'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Thank you page
+  if (currentPage === 'thanks') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center relative overflow-hidden">
+        <ParticleField />
+        <MatrixRain />
+        
+        <div className="relative z-10 text-center space-y-8 p-8 animate-fade-in">
+          <div className="mb-8">
+            <Sparkles className="w-24 h-24 mx-auto text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
+          </div>
+          
+          <h1 className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 animate-pulse">
+            Thank You!
+          </h1>
+          
+          <p className="text-2xl text-gray-300 max-w-2xl mx-auto">
+            Thank you for exploring the fascinating world of prime numbers with us.
+          </p>
+          
+          <div className="bg-black/30 backdrop-blur-md rounded-2xl p-8 border border-purple-500/30 max-w-md mx-auto">
+            <p className="text-cyan-300 text-lg">
+              Assignment Completed Successfully
+            </p>
+            <div className="mt-4 text-gray-400">
+              All {questions.length} questions explored
+            </div>
+          </div>
+          
+          <button
+            onClick={() => {
+              setCurrentPage('intro');
+              setCurrentQuestion(1);
+              setActiveTab('question');
+              setSolution('');
+              setInputs({});
+            }}
+            className="mt-8 px-8 py-4 bg-gradient-to-r from-yellow-500 to-pink-600 rounded-full text-white font-bold text-lg hover:scale-105 transform transition-all duration-300 shadow-2xl hover:shadow-yellow-500/50"
+          >
+            Start Again
+          </button>
+          
+          {/* Add celebration sound here */}
+          {/* <audio autoPlay src="/celebration.mp3" /> */}
+        </div>
+      </div>
+    );
+  }
+  
+  return null;
+};
+
+// Add CSS animation for falling matrix effect
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fall {
+    to {
+      transform: translateY(100vh);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 1s ease-out;
+  }
+`;
+document.head.appendChild(style);
+
+export default App;
