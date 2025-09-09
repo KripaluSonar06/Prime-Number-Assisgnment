@@ -1,0 +1,554 @@
+# Prime Numbers Assignment GUI
+
+I'll create a React-based GUI for your prime numbers assignment with all the requested features. Let me build a comprehensive solution with multiple components.
+
+```jsx
+// App.js
+import React, { useState, useEffect } from 'react';
+import HomePage from './components/HomePage';
+import QuestionPage from './components/QuestionPage';
+import ThankYouPage from './components/ThankYouPage';
+import { questions } from './data/questions';
+import './styles/App.css';
+
+function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+
+  useEffect(() => {
+    // Preload background image
+    const img = new Image();
+    img.src = '/api/placeholder/1920/1080';
+    img.onload = () => setBackgroundLoaded(true);
+  }, []);
+
+  const navigateToQuestion = (index) => {
+    setCurrentQuestion(index);
+    setCurrentPage('question');
+  };
+
+  const navigateToThanks = () => {
+    setCurrentPage('thanks');
+  };
+
+  if (!backgroundLoaded) {
+    return <div className="loading-screen">Loading...</div>;
+  }
+
+  return (
+    <div className="app">
+      {currentPage === 'home' && (
+        <HomePage onStart={() => navigateToQuestion(0)} />
+      )}
+      
+      {currentPage === 'question' && (
+        <QuestionPage
+          question={questions[currentQuestion]}
+          questionNumber={currentQuestion + 1}
+          totalQuestions={questions.length}
+          onNext={() => {
+            if (currentQuestion < questions.length - 1) {
+              navigateToQuestion(currentQuestion + 1);
+            } else {
+              navigateToThanks();
+            }
+          }}
+          onPrevious={() => {
+            if (currentQuestion > 0) {
+              navigateToQuestion(currentQuestion - 1);
+            }
+          }}
+        />
+      )}
+      
+      {currentPage === 'thanks' && <ThankYouPage />}
+    </div>
+  );
+}
+
+export default App;
+```
+
+```jsx
+// components/HomePage.js
+import React from 'react';
+import './HomePage.css';
+
+const HomePage = ({ onStart }) => {
+  return (
+    <div className="homepage">
+      <div className="matrix-background"></div>
+      <div className="content">
+        <h1 className="title animate__animated animate__fadeInDown">Prime Numbers Assignment</h1>
+        <div className="team-members animate__animated animate__fadeInUp">
+          <h2>Presented by:</h2>
+          <ul>
+            <li>xyz - roll no 1</li>
+            <li>yzx - roll no 2</li>
+            <li>zxy - roll no 3</li>
+          </ul>
+        </div>
+        <button className="start-button" onClick={onStart}>
+          Begin Exploration
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
+```
+
+```jsx
+// components/QuestionPage.js
+import React, { useState } from 'react';
+import QuestionTabs from './QuestionTabs';
+import SolutionTerminal from './SolutionTerminal';
+import HintSection from './HintSection';
+import CodeView from './CodeView';
+import './QuestionPage.css';
+
+const QuestionPage = ({ question, questionNumber, totalQuestions, onNext, onPrevious }) => {
+  const [activeTab, setActiveTab] = useState('question');
+  const [solutionData, setSolutionData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [inputValues, setInputValues] = useState({});
+
+  const handleInputChange = (name, value) => {
+    setInputValues(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleGetSolution = async () => {
+    setIsLoading(true);
+    setActiveTab('solution');
+    
+    // Simulate API call to backend
+    try {
+      // This would be replaced with actual API call to your Python backend
+      const response = await fetch('/api/solve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          questionId: question.id,
+          inputs: inputValues
+        })
+      });
+      
+      const data = await response.json();
+      setSolutionData(data);
+    } catch (error) {
+      console.error('Error:', error);
+      setSolutionData({
+        output: "Error connecting to the solver service. Please try again.",
+        result: null
+      });
+    }
+    
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="question-page">
+      <div className="navigation">
+        <button onClick={onPrevious} disabled={questionNumber === 1}>
+          Previous
+        </button>
+        <span>Question {questionNumber} of {totalQuestions}</span>
+        <button onClick={onNext} disabled={questionNumber === totalQuestions}>
+          Next
+        </button>
+      </div>
+
+      <div className="question-card">
+        <QuestionTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          hasSolution={!!solutionData}
+        />
+        
+        <div className="tab-content">
+          {activeTab === 'question' && (
+            <div className="question-content">
+              <h2>{question.title}</h2>
+              <p>{question.description}</p>
+              
+              <div className="input-section">
+                {question.inputs.map(input => (
+                  <div key={input.name} className="input-group">
+                    <label>{input.label}</label>
+                    <input
+                      type={input.type}
+                      value={inputValues[input.name] || ''}
+                      onChange={(e) => handleInputChange(input.name, e.target.value)}
+                    />
+                  </div>
+                ))}
+                
+                <button 
+                  className="solve-button"
+                  onClick={handleGetSolution}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Processing...' : 'Get Solution'}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'solution' && (
+            <SolutionTerminal 
+              output={solutionData?.output} 
+              result={solutionData?.result}
+              isLoading={isLoading}
+            />
+          )}
+          
+          {activeTab === 'hint' && (
+            <HintSection 
+              hint={question.hint}
+              code={question.code}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default QuestionPage;
+```
+
+```jsx
+// components/SolutionTerminal.js
+import React, { useEffect, useRef } from 'react';
+import './SolutionTerminal.css';
+
+const SolutionTerminal = ({ output, result, isLoading }) => {
+  const terminalRef = useRef(null);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [output]);
+
+  return (
+    <div className="terminal">
+      <div className="terminal-header">
+        <div className="terminal-buttons">
+          <span className="terminal-button close"></span>
+          <span className="terminal-button minimize"></span>
+          <span className="terminal-button expand"></span>
+        </div>
+        <div className="terminal-title">Solution Output</div>
+      </div>
+      
+      <div className="terminal-content" ref={terminalRef}>
+        {isLoading ? (
+          <div className="loading-animation">
+            <div className="spinner"></div>
+            <p>Running prime number calculations...</p>
+          </div>
+        ) : output ? (
+          <>
+            <pre>{output}</pre>
+            {result && (
+              <div className="result-section">
+                <h3>Final Result:</h3>
+                <div className="result-value">{result}</div>
+              </div>
+            )}
+          </>
+        ) : (
+          <p>Run the solution to see the output here.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SolutionTerminal;
+```
+
+```jsx
+// components/HintSection.js
+import React, { useState } from 'react';
+import CodeView from './CodeView';
+import './HintSection.css';
+
+const HintSection = ({ hint, code }) => {
+  const [showCode, setShowCode] = useState(false);
+
+  return (
+    <div className="hint-section">
+      {!showCode ? (
+        <>
+          <h3>Hint & Approach</h3>
+          <div className="hint-content">
+            <p>{hint}</p>
+            <button 
+              className="code-toggle"
+              onClick={() => setShowCode(true)}
+            >
+              Show Code
+            </button>
+          </div>
+        </>
+      ) : (
+        <CodeView 
+          code={code}
+          onClose={() => setShowCode(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default HintSection;
+```
+
+```jsx
+// components/CodeView.js
+import React from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import './CodeView.css';
+
+const CodeView = ({ code, onClose }) => {
+  return (
+    <div className="code-view">
+      <div className="code-header">
+        <h3>Solution Code</h3>
+        <button className="close-button" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      <div className="code-content">
+        <SyntaxHighlighter 
+          language="python" 
+          style={atomDark}
+          showLineNumbers
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
+    </div>
+  );
+};
+
+export default CodeView;
+```
+
+```jsx
+// components/ThankYouPage.js
+import React, { useEffect } from 'react';
+import './ThankYouPage.css';
+
+const ThankYouPage = () => {
+  useEffect(() => {
+    // Play thank you sound
+    const audio = new Audio('/sounds/thank-you.mp3');
+    audio.play().catch(e => console.log('Audio play failed:', e));
+    
+    // Confetti effect
+    if (window.confetti) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  }, []);
+
+  return (
+    <div className="thankyou-page">
+      <div className="thankyou-content">
+        <h1>Thank You!</h1>
+        <p>We hope you enjoyed exploring the fascinating world of prime numbers.</p>
+        <div className="signature">
+          <p>- The Prime Explorers Team</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ThankYouPage;
+```
+
+```jsx
+// data/questions.js
+export const questions = [
+  {
+    id: 1,
+    title: "Palindrome Prime Pattern",
+    description: "A prime number is 12345678910987654321. Here n is 10. Find the next number that follows this pattern. That number n lies between 1000 and 3000.",
+    inputs: [
+      { name: "minN", label: "Min n value", type: "number", default: 1000 },
+      { name: "maxN", label: "Max n value", type: "number", default: 3000 }
+    ],
+    hint: "This problem involves finding the next palindrome prime number in the pattern 123...n...321. The solution checks numbers formed by concatenating integers from 1 to n and then back to 1, testing each for primality using a combination of small prime divisibility checks and the Miller-Rabin test.",
+    code: `# Code from 1_t.py
+import random
+import sys
+import gmpy2
+
+def small_prime_check(num, p_set):
+    x = int(num)
+    for p in p_set:
+        if x % p == 0 and x != p:
+            return False
+    return True
+
+def MR_Primality_Check(num):
+    # ... Miller-Rabin implementation
+    return isPrime
+
+small_prime_set = {2}
+# ... small prime set generation
+
+sys.set_int_max_str_digits(100000)
+n = int(input("Enter min n value: "))
+m = int(input("Enter max n value: "))
+prime_numbers_set = []
+for i in range(n, m + 1):
+    num = ""
+    for x in range(1, i + 1):
+        num += str(x)
+    for x in range(1, i):
+        num += str(i - x)
+    print(f"token no. {i - n +1} / {m-n+1}")
+    if small_prime_check(num, small_prime_set) == False:
+        print(f"for n = {i}, number is not prime\\n")
+        continue
+    if gmpy2.is_prime(int(num)) == True:
+        prime_numbers_set.append(i)
+        print(f"{num} is prime number where n = {i}\\n")
+    else:
+        print(f"for n = {i}, number is not prime\\n")
+
+for p in prime_numbers_set:
+    print(f"for n = {p}, there is a prime number")`
+  },
+  {
+    id: 2,
+    title: "Repunit Primes",
+    description: "11 is prime, 111 is not prime. We use the notation, 1N means N ones. If N is prime 1N might be prime. Determine the 5 primes between N=2 and N=1040.",
+    inputs: [
+      { name: "minN", label: "Min N value", type: "number", default: 2 },
+      { name: "maxN", label: "Max N value", type: "number", default: 1040 },
+      { name: "targetPrimes", label: "Primes to find", type: "number", default: 5 }
+    ],
+    hint: "Repunit primes are primes consisting of all 1's. The solution checks if N is prime first, then checks if the repunit number (10^N - 1)/9 is prime using the Miller-Rabin test.",
+    code: `# Code from 2.py
+import random
+import sys
+import sympy
+
+# ... small prime set and functions
+
+sys.set_int_max_str_digits(100000)
+n = int(input("Enter min n value: "))
+m = int(input("Enter max n value: "))
+pm = int(input("After how many prime should the program exit (if found): "))
+prime_count = 0
+for i in range(n, m+1):
+    if small_prime_check(i, small_prime_set) == False:
+        continue
+    if MR_Primality_Check(i) == False:
+        continue
+    if MR_Primality_Check(((10**i - 1) // 9)) == True:
+        prime_count += 1
+        print(f"1({i}) = {((10**i - 1) // 9)} is a prime number")
+        print(f"Prime count so far = {prime_count}")
+    if prime_count == pm:
+        break`
+  },
+  // Add more questions following the same pattern
+];
+```
+
+```css
+/* styles/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background: #0a0a16;
+  color: #00ffcc;
+  overflow-x: hidden;
+}
+
+.app {
+  min-height: 100vh;
+  background: linear-gradient(125deg, #0a0a16 0%, #1a1a3a 100%);
+}
+
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
+  color: #00ffcc;
+}
+
+/* Matrix background animation */
+.matrix-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.3;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%2300ffcc" x="0" y="0" width="1" height="1" /></svg>') 0 0/10px 10px;
+  pointer-events: none;
+}
+
+.matrix-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(transparent 90%, #0a0a16 99%);
+  animation: matrixRain 20s linear infinite;
+}
+
+@keyframes matrixRain {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100vh; }
+}
+
+/* Add more component-specific styles as needed */
+```
+
+This implementation provides:
+
+1. A homepage with team information and a "Matrix"-style animated background
+2. Question pages with input fields, tabs for Question/Solution/Hint views
+3. A terminal component to display solution output
+4. A code view component with syntax highlighting
+5. A thank you page with confetti animation and sound
+
+To complete this application, you would need to:
+
+1. Set up a backend API that can execute your Python code safely
+2. Add the remaining questions to the questions.js file
+3. Add appropriate sounds and animations
+4. Style each component with the CSS files referenced
+
+The backend would need to securely execute the Python code and return the output. You might consider using WebSockets for real-time output streaming as the solutions run.
+
+Would you like me to elaborate on any specific part of this implementation?
