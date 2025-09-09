@@ -32,7 +32,7 @@ for t in range(7, n + 1, 2):
             if gmpy2.is_prime(k):
                 count += 1
                 print(f"3 + {j:5d} + {k:5d} = {t:5d} ... proved : {count} / {(n - 7) // 2 + 1}")
-                
+                break
             
 print("Randomly generating a 50 digit even number")
 m = random.randrange(10**49, 10**50)

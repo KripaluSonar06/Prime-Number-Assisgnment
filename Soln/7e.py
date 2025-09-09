@@ -30,7 +30,8 @@ for i in range(1, n + 1):
             continue
         if gmpy2.is_prime(k):
             found = True
-            print(f"=> {k}")
+            print(f"Prime Found => {k}")
+            break
         k += 1
     if found:
         count += 1

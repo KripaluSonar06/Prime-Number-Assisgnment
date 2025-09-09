@@ -1,6 +1,6 @@
 import random
 
-def isPrime1(num, p_set):
+def small_prime_check(num, p_set):
     x = int(num)
     for p in p_set:
         if x % p == 0 and x != p:
@@ -57,7 +57,7 @@ found = False
 while True:
     for x in range(0, 10):
         palindrome = half + str(x) + half[::-1]
-        if not isPrime1(palindrome, small_prime_set):
+        if not small_prime_check(palindrome, small_prime_set):
             continue
         if MR_Primality_Check(palindrome):
             prime_count += 1
