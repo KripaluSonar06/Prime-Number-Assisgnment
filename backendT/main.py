@@ -1,14 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 import random
 import gmpy2
 import time
 import sys
-import asyncio
-import json
 
-app = FastAPI()
+app = FastAPI(title="Prime Questions API")
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Prime Questions API!"}
+
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse("path/to/favicon.ico")
 
 app.add_middleware(
     CORSMiddleware,
