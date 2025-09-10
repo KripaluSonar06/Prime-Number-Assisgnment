@@ -5,12 +5,16 @@ import random
 import gmpy2
 import time
 import sys
+import asyncio
+import json
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # your React app
+    allow_origins=[
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,7 +66,9 @@ sys.set_int_max_str_digits(100000)
 
 # Q1 Streaming
 @app.get("/question1_stream")
-def question1_stream(n: int, m: int):
+async def question1_stream(minN: int, maxN: int):
+    n = minN
+    m = maxN
     def generate():
         prime_numbers_set = []
         for i in range(n, m + 1):
@@ -89,7 +95,10 @@ def question1_stream(n: int, m: int):
 
 # Q2 Streaming
 @app.get("/question2_stream")
-def question2_stream(n: int, m: int, pm: int):
+def question2_stream(minN: int, maxN: int, exitCount: int):
+    n = minN
+    m = maxN
+    pm = exitCount
     def generate():
         prime_count = 0
         for i in range(n, m+1):
@@ -110,7 +119,9 @@ def question2_stream(n: int, m: int, pm: int):
 
 # Q3 Streaming
 @app.get("/question3_stream")
-def question3_stream(n: int, m: int):
+def question3_stream(minP: int, maxP: int):
+    n = minP
+    m = maxP
     def generate():
         prime_count = 0
         for i in range(n, m+1):
@@ -127,7 +138,9 @@ def question3_stream(n: int, m: int):
 
 # --- Q4 Streaming ---
 @app.get("/question4_stream")
-def question4_stream(n: int, m: int):
+def question4_stream(minP: int, maxP: int):
+    n = minP
+    m = maxP
     def generate():
         primes = []
         for i in range(n, m+1):
@@ -166,7 +179,10 @@ def question4_stream(n: int, m: int):
 
 # --- Q5 Streaming ---
 @app.get("/question5_stream")
-def question5_stream(n: int, m: int, pm: int):
+def question5_stream(minDigits: int, maxDigits: int, exitCount: int):
+    n = minDigits
+    m = maxDigits
+    pm = exitCount
     def generate():
         prime_count = 0
         n1 = n
@@ -197,7 +213,9 @@ def question5_stream(n: int, m: int, pm: int):
 
 # --- Q6 Streaming ---
 @app.get("/question6_stream")
-def question6_stream(n: int, m: int):
+def question6_stream(minP: int, maxP: int):
+    n = minP
+    m = maxP
     def generate():
         powers = []
         for i in range(n, m+1):
@@ -233,7 +251,30 @@ def question6_stream(n: int, m: int):
     return StreamingResponse(generate(), media_type="text/plain")
 
 # --- Q7a Streaming ---
-@app.get("/question7a_stream")
+@app.get("/question7_stream")
+def handleQuestion7(type: str, limit: int):
+    match type:
+        case 'a':
+            return question7a_stream(limit)            
+    
+        case 'b':
+            return question7b_stream(limit)            
+
+        case 'c':
+            return question7c_stream(limit)            
+
+        case 'd':
+            return question7d_stream(limit)            
+
+        case 'e':
+            return question7e_stream(limit)            
+
+        case 'f':
+            return question7f_stream(limit)            
+
+
+    
+    
 def question7a_stream(n: int):
     def generate():
         WP = []
