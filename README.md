@@ -2,14 +2,14 @@
 
 
 
-> **A beautiful 3D animated React + Express.js application that visualizes and solves 7 prime number problems with real-time Python execution and a stunning interface.**
+> **A beautiful 3D animated React application that visualizes and solves 7 prime number problems with real-time Python execution and a stunning interface.**
 
 ***
 
 ## 🚀 Features
 
 - **3D animated landing page** with mathematical particle effects
-- **Interactive question selection** (7 questions corresponding to attached Python files)
+- **Interactive question selection as a card** (7 questions corresponding to attached Python files)
 - **Live terminal output** running your Python code in the backend
 - **Tabbed interface**: Question, Solution (terminal), Hint & code viewer
 - **Progress tracker** and visual completion effects
