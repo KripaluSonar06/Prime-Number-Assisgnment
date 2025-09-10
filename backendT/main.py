@@ -40,7 +40,7 @@ def MR_Primality_Check(num):
         return True
     elif x < 2:
         return False
-    k = 25
+    k = 10 #changed to 10 from 40 (after presentatation)
     isPrime = True
     for _ in range(k):
         div_done = False
