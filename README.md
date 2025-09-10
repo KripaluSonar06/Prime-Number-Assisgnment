@@ -32,7 +32,7 @@
 ### Prerequisites
 
 - Node.js (16+ recommended)
-- Python (3.8+ recommended; with `gmpy2` and `sympy`)
+- Python (3.8+ recommended)
 - npm (usually comes with node)
 
 ### One-shot Setup
