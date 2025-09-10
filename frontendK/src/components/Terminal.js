@@ -18,7 +18,7 @@ const Terminal = ({ output, isRunning }) => {
           <div className="terminal-button yellow"></div>
           <div className="terminal-button green"></div>
         </div>
-        <div className="terminal-title">Prime Numbers Solution Output</div>
+        <div className="terminal-title">Solution Output</div>
         <div className="terminal-status">
           {isRunning ? (
             <span className="status-running">🔄 Running</span>
@@ -30,7 +30,7 @@ const Terminal = ({ output, isRunning }) => {
       <div className="terminal-body" ref={terminalRef}>
         <div className="terminal-prompt">
           <span className="prompt-symbol">$</span>
-          <span className="prompt-text">python3 prime_solver.py</span>
+          <span className="prompt-text">solution.py</span>
         </div>
         <pre className="terminal-output">
           {output || (isRunning ? 'Executing Python script...\n' : 'Click "Get Solution" to run the Python script.\n\nThe output will appear here in real-time.')}

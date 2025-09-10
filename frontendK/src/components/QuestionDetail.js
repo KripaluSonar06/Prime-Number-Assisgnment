@@ -170,13 +170,30 @@ const QuestionDetail = ({ onComplete }) => {
               <p className="question-description">{question.description}</p>
               <div className="inputs-section">
                 {question.inputs.map((input, index) => renderInputField(input, index))}
-                <button
-                  className="run-button"
-                  onClick={handleRunSolution}
-                  disabled={isRunning}
-                >
-                  {isRunning ? '🔄 Running...' : '🚀 Get Solution'}
-                </button>
+                <div className="run-buttons">
+                  <button
+                    className="run-button"
+                    onClick={handleRunSolution}
+                    disabled={isRunning}
+                  >
+                    {isRunning ? '🔄 Running...' : '🚀 Get Solution'}
+                  </button>
+
+                  {/* {isRunning && (
+                    <button
+                      className="abort-button"
+                      onClick={() => {
+                        if (controllerRef.current) {
+                          controllerRef.current.abort();
+                          setIsRunning(false);
+                          setOutput(prev => prev + "\n⚠️ Solution aborted by user\n");
+                        }
+                      }}
+                    >
+                      ⛔ Stop
+                    </button>
+                  )} */}
+                </div>
               </div>
             </motion.div>
           )}
@@ -189,6 +206,20 @@ const QuestionDetail = ({ onComplete }) => {
               transition={{ duration: 0.5 }}
             >
               <Terminal output={output} isRunning={isRunning} />
+              {isRunning && (
+                <button
+                  className="abort-button"
+                  onClick={() => {
+                    if (controllerRef.current) {
+                      controllerRef.current.abort();
+                      setIsRunning(false);
+                      setOutput(prev => prev + "\n⚠️ Solution aborted by user\n");
+                    }
+                  }}
+                >
+                  ⛔ Stop
+                </button>
+              )}
             </motion.div>
           )}
 
