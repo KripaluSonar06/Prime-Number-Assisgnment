@@ -87,7 +87,11 @@ async def question1_stream(minN: int, maxN: int):
             else:
                 yield f"for n = {i}, number is not prime\n"
             time.sleep(0.2)
-            
+        yield ""
+        if not prime_numbers_set:
+            yield f"No primes found in this interval\n"
+        else:
+            yield f"{len(prime_numbers_set)} prime(s) found in this interval\n"
         for p in prime_numbers_set:
             yield f"for n = {p}, there is a prime number\n"
         yield "Done!\n"
@@ -277,7 +281,7 @@ def handleQuestion7(type: str, limit: int):
     
 def question7a_stream(n: int):
     def generate():
-        WP = []
+        WPrime = []
         for i in range(2, n + 1):
             yield f"Checking {i} ...\n"
             if not small_prime_check(i, small_prime_set):
@@ -286,14 +290,16 @@ def question7a_stream(n: int):
             if gmpy2.is_prime(i):
                 yield f"It is a Prime and ... "
                 if pow(2, i-1, i*i) == 1:
-                    WP.append(i)
+                    WPrime.append(i)
                     yield f"{i} is a Wieferich Prime!\n"
                 else:
                     yield f"{i} is not a Wieferich Prime\n"
             else:
                 yield f"Not even a Prime!\n"
         time.sleep(0.05)
-        for w in WP:
+        if len(WPrime) == 0:
+            yield "No primes found in this interval\n"
+        for w in WPrime:
             yield f"Found that, {w} is a Wieferich Prime!\n"
         yield "Done!\n"
     return StreamingResponse(generate(), media_type="text/plain")

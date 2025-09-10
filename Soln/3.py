@@ -1,6 +1,4 @@
 import random
-import sys
-import sympy
 
 small_prime_set = {2}
 for i in range(3, 101):
@@ -46,7 +44,6 @@ def MR_Primality_Check(num):
             break
     return isPrime
 
-# sys.set_int_max_str_digits(100000)
 n = int(input("Enter min p value: "))
 m = int(input("Enter max p value: "))
 prime_count = 0

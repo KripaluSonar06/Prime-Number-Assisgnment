@@ -36,19 +36,16 @@ const LandingPage = () => {
           <h2 className="team-title">Presented by:</h2>
           <div className="team-members">
             <div className="team-member">
-              <span className="member-number">1.</span>
-              <span className="member-name">xyz</span>
-              <span className="member-roll">roll no 1</span>
+              <span className="member-name">Malhar Kanhegaonkar</span>
+              <span className="member-roll">Roll No: ES24BTECH11018</span>
             </div>
             <div className="team-member">
-              <span className="member-number">2.</span>
-              <span className="member-name">yzx</span>
-              <span className="member-roll">roll no 2</span>
+              <span className="member-name">Kripalu Sonar</span>
+              <span className="member-roll">Roll No: ES24BTECH11021</span>
             </div>
             <div className="team-member">
-              <span className="member-number">3.</span>
-              <span className="member-name">zxy</span>
-              <span className="member-roll">roll no 3</span>
+              <span className="member-name">Taleem Hossain</span>
+              <span className="member-roll">Roll No: ES24BTECH11036</span>
             </div>
           </div>
         </motion.div>
@@ -64,7 +61,7 @@ const LandingPage = () => {
         >
           Start Assignment
         </motion.button>
-
+{/* 
         <motion.div 
           className="scroll-indicator"
           initial={{ opacity: 0 }}
@@ -73,7 +70,7 @@ const LandingPage = () => {
         >
           <span>Click to begin your mathematical journey</span>
           <div className="scroll-arrow">✨</div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </motion.div>
   );

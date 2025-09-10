@@ -1,6 +1,5 @@
 import random
 import sys
-import sympy
 
 small_prime_set = {2}
 for i in range(3, 101):

@@ -234,12 +234,7 @@ const QuestionDetail = ({ onComplete }) => {
                   transition={{ duration: 0.5 }}
                 >
                   <pre>
-                    <code>
-                      {`# Python Solution for Question ${id}: ${question.title}
-
-# The real Python code is in the backend
-# The frontend streams results directly from FastAPI endpoints`}
-                    </code>
+                    <code>{question.code}</code>
                   </pre>
                 </motion.div>
               )}

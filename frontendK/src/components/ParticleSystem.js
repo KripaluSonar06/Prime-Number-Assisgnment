@@ -17,8 +17,8 @@ const ParticleSystem = () => {
     resizeCanvas();
 
     const particles = [];
-    const particleCount = 80;
-    const equations = ['π', '∑', '∞', 'φ', '∆', '∫', '√', 'α', 'β', 'γ', '∂', '∈'];
+    const particleCount = 100;
+    const equations = ['2', '3', '5', '7', '11', '13', '17', '19', '23', '29', '31', '37', '41', '43', '47'];
 
     class Particle {
       constructor() {
@@ -32,7 +32,7 @@ const ParticleSystem = () => {
         this.y = -10;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = Math.random() * 1 + 0.5;
-        this.size = Math.random() * 3 + 1;
+        this.size = Math.random() * 7;
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.02;
         this.type = Math.random() > 0.7 ? 'equation' : 'dot';

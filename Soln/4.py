@@ -1,5 +1,4 @@
 import random
-import sys
 import gmpy2
 
 small_prime_set = {2}
@@ -46,7 +45,6 @@ def MR_Primality_Check(num):
             break
     return isPrime
 
-# sys.set_int_max_str_digits(100000)
 n = int(input("Enter min p value: "))
 m = int(input("Enter max p value: "))
 primes = []

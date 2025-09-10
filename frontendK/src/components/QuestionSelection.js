@@ -16,7 +16,7 @@ const QuestionSelection = ({ completedQuestions }) => {
   const questions = [
     { id: 1, title: "Pattern Prime Numbers", description: "Find primes following concatenation pattern" },
     { id: 2, title: "Repunit Primes", description: "Find primes consisting only of 1's" },
-    { id: 3, title: "Mersenne Primes", description: "Find primes of form 2^p - 1" },
+    { id: 3, title: "Mersenne Primes", description: "Find primes of form => 2^p - 1" },
     { id: 4, title: "Brocard's Conjecture", description: "Four primes between consecutive prime squares" },
     { id: 5, title: "Palindromic Primes", description: "Find palindromic prime numbers" },
     { id: 6, title: "Perfect Numbers", description: "Find perfect numbers using Mersenne primes" },
