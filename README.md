@@ -116,7 +116,3 @@ Built for IIT Hyderabad Prime Numbers Assignment for Numerical Methods (CH2120) 
 
 ***
 
-
-[7](https://stackoverflow.com/questions/71193194/github-pages-only-showing-readme-file-in-react-app)
-[8](https://www.makeareadme.com)
-[9](https://github.com/topics/react-project)
