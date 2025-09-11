@@ -114,10 +114,10 @@ def question2_stream(minN: int, maxN: int, exitCount: int):
         for i in range(n, m+1):
             if not small_prime_check(i, small_prime_set):
                 continue
-            if not MR_Primality_Check(i):
+            if not gmpy2.is_prime(i):
                 continue
             x = (10**i - 1) // 9
-            if MR_Primality_Check(x):
+            if gmpy2.is_prime(x):
                 prime_count += 1
                 yield f"1({i}) = {x} is a prime number\n"
                 yield f"Prime count so far = {prime_count}\n"
@@ -138,7 +138,7 @@ def question3_stream(minP: int, maxP: int):
             x = 2**i - 1
             if not small_prime_check(x, small_prime_set):
                 continue
-            if MR_Primality_Check(x):
+            if gmpy2.is_prime(x):
                 prime_count += 1
                 yield f"2^{i} - 1 = {x} is a prime number\n"
                 yield f"Prime count so far = {prime_count}\n"
@@ -206,7 +206,7 @@ def question5_stream(minDigits: int, maxDigits: int, exitCount: int):
                 palindrome = half + str(x) + half[::-1]
                 if not small_prime_check(int(palindrome), small_prime_set):
                     continue
-                if MR_Primality_Check(int(palindrome)):
+                if gmpy2.is_prime(int(palindrome)):
                     prime_count += 1
                     yield f"{palindrome} is a prime number and it has {len(palindrome)} digits\n"
                     yield f"Prime count so far = {prime_count}\n"
@@ -234,7 +234,7 @@ def question6_stream(minP: int, maxP: int):
                 continue
             if small_prime_check(x, small_prime_set) == False:
                 continue
-            if MR_Primality_Check(x) == True:
+            if gmpy2.is_prime(x) == True:
                 yield f"2^{i} - 1 = {x} is a prime number\n"
                 powers.append(i)
         for p in powers:
