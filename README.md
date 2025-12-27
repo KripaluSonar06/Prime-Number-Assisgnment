@@ -5,8 +5,8 @@
 > **A beautiful 3D animated React application that visualizes and solves 7 prime number problems with real-time Python execution and a stunning interface.**
 
 ***
-https://drive.google.com/file/d/1gqSbDRXjiazFHpSbRySzennW0PO7daWW/view?usp=drive_link
-
+<img width="1076" height="771" alt="Screenshot 2025-09-10 114925" src="https://github.com/user-attachments/assets/6b61e30b-e148-4172-8cea-c0fd5f77b68a" />
+https://drive.google.com/drive/folders/1YOlYppByHHCWIyuW_Qh8bZ8JTpsT9CIG?usp=drive_link
 
 ## 🚀 Features
 
